@@ -1,0 +1,16 @@
+model{
+    for (i in 1:N){ 
+    c[i+1]<-exp(-i*h*(Qprime+kl*V)/V)*c[1]+1/(-(Qprime+kl*V)/V)*
+    (exp(-i*h*(Qprime+kl*V)/V)-1)*Gprime/V
+    logyt[i+1]~dnorm(log(c[i+1]), prec)
+    loglik[i+1]<-log(dnorm(logyt[i+1],log(c[i+1]),prec))
+    }
+    loglik[1]<-log(dnorm(logyt[1],log(c[1]),prec))
+    c[1]<-1
+    logyt[1]~dnorm(log(c[1]), prec)
+    sigma<-1/prec
+    prec~dgamma(2,0.01)
+    Qprime~dunif(11,17)
+    Gprime~dunif(281,482)
+    kl~dunif(0,0.8)
+    }

@@ -1,0 +1,33 @@
+model{
+    for (i in 1:N){
+    omega[i+1]~dgamma(0.001,0.001)
+    loglik[i+1]<-logdensity.mnorm(logyt[,i+1],log(csp[,i+1]+abs(et)),prec)
+    for(j in 1:nloc){
+    csp[j,i+1]<-csp[j,i]+h*(Gprime/(4*(pi*Dt*i)^1.5))*
+    (exp(-(matdist[j])^2/(4*Dt*i)))+(omega[i+1])
+    logyt[j,i+1]~dnorm(log(csp[j,i+1]+et[j]), 10)
+    logyhat[j,i+1]~dnorm(log(csp[j,i+1]+et[j]), 10)
+    }
+    }
+#    for(i in 1:(N+1)){
+ #   eta[i]~dnorm(0,10)
+    #vt[(i+1)]<-vt[i]+eta[i]
+  #  }
+    for(j in 1:nloc){
+    for(m in 1:nloc){
+    k[m,j]<-I[m,j]+sigma*exp(-dist[m,j])
+    }
+    }
+    kinv<-inverse(k)
+    et~dmnorm(muet,kinv)
+    #logyt[j,1]~dnorm(log(csp[j,1]+et[j])+eta[1], tausq)
+for(j in 1:nloc){
+    logyhat[j,1]~dnorm(log(csp[j,1]+et[j]), 10)
+    csp[j,1]<-exp(logyt[j,1])+omega[1]
+    }
+    omega[1]~dgamma(0.001,0.001)
+    #vt[1]<-0
+    Gprime~dunif(281,482)
+    Dt~dunif(0,3)
+    sigma~dgamma(0.01,0.01)
+    }

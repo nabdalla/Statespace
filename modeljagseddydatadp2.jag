@@ -1,0 +1,60 @@
+model{
+    for (i in 1:N){
+    omega[i+1]~dnorm(aomega2[z1[i+1]],bomega[z2[i+1]])T(-(csp[1,i]+h*(Gprime/(4*(pi*Dt*i)^1.5))*
+    (exp(-(matdist[1])^2/(4*Dt*i)))),)
+    for(j in 1:nloc){
+    csp[j,i+1]<-csp[j,i]+h*(Gprime/(4*(pi*Dt*i)^1.5))*
+    (exp(-(matdist[j])^2/(4*Dt*i)))+(omega[i+1])
+    logacetone00484[i+1,j]~dnorm((csp[j,i+1])+w[i+1,j], tausq)
+    yhat[i+1,j]~dnorm((csp[j,i+1])+w[i+1,j], tausq)T(0,)
+    }
+    z1[i+1]~dcat(p1[])
+    z2[i+1]~dcat(p2[])
+    z3[i+1]~dcat(p3[])
+    }
+    for(j in 1:nloc){
+    yhat[1,j]~dnorm((csp[j,1])+w[1,j], tausq)T(0,)
+    for(m in 1:nloc){
+    k[m,j]<-sigma*exp(-phi*dist[m,j])
+    }
+    }
+    kinv<-inverse(k)
+    p1[1]<-r1[1]
+    p2[1]<-r2[1]
+    p3[1]<-r3[1]
+    for(j in 2:(m-1)){p1[j]<-(r1[j]*(1-r1[j-1])*p1[j-1]/r1[j-1])+0.0001
+    p2[j]<-(r2[j]*(1-r2[j-1])*p2[j-1]/r2[j-1])+0.0001
+    p3[j]<-(r3[j]*(1-r3[j-1])*p3[j-1]/r3[j-1])+0.0001}
+    for(l in 1:(m-1)){r1[l]~dbeta(1,alpha+0.0001)
+    r2[l]~dbeta(1,alpha+0.0001)
+    r3[l]~dbeta(1,alpha+0.0001)
+    }
+    ps1<-sum(p1[1:(m-1)])
+    p1[m]<-1-ps1
+    ps2<-sum(p2[1:(m-1)])
+    p2[m]<-1-ps2
+    ps3<-sum(p3[1:(m-1)])
+    p3[m]<-1-ps3
+    for(l in 1:m){
+    aomega[l]~dnorm(0,10000)
+    bomega[l]~dgamma(0.01,0.01)
+    aomega2[l]<-aomega[l]-mean(aomega)
+    #vari[1:2,1:2,l]~dwish(I,3)
+    et[1:nloc,l]~dmnorm(muet,kinv)
+    for(k in 1:nloc){
+    etw[k,l]<-et[k,l]*p3[l]
+    et2[k,l]<-et[k,l]-mean(et[k,1:m])
+    }}
+    w[1,1:nloc]<-c(0,0)
+    for(t in 1:N){
+    w[t+1,1:nloc]<-w[t,1:nloc]+et2[1:nloc,z3[t+1]]
+    }
+    csp[1:2,1]<-(logacetone00484[1,1:2])+omega[1]
+    omega[1]~dnorm(0,100)
+    sigma~dgamma(0.01,0.01)
+    phi~dgamma(0.01,0.01)
+    tausq~dgamma(0.01,0.01)
+    alpha~dgamma(0.01,0.01)
+    Gprime~dunif(1104,1650)
+    Dt~dunif(0,1)
+    }

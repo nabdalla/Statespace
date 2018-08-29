@@ -1,0 +1,61 @@
+model{
+    for (i in 1:N){ 
+    #omega[i+1]~dnorm(0,bomega[z2[i+1]])
+    omega[i+1]~dnorm(aomega2[z1[i+1]],bomega[z2[i+1]])T(-((1-h*(Qprime+kl*V)/V)*c[i]+h*Gprime/V),)
+    c[i+1]<-((1-h*(Qprime+kl*V)/V)*c[i]+h*Gprime/V)+(omega[i+1])
+    et[i+1]~dnorm(muv2[z4[i+1]],sigmav[z3[i+1]])T(-c[i+1],)
+    yt[i+1]~dnorm((c[i+1])+muv2[z4[i+1]],sigmav[z3[i+1]])
+    yhat[i+1]~dnorm((c[i+1])+muv2[z4[i+1]],sigmav[z3[i+1]])T(0,)
+    #yhat[i+1]<-ifelse(yhatu[i+1]<0,0,yhatu[i+1])
+    loglik[i+1]<-log(dnorm(yt[i+1],(c[i+1])+muv2[z4[i+1]],sigmav[z3[i+1]]))
+    z1[i+1]~dcat(p1[])
+    z2[i+1]~dcat(p2[])
+    z3[i+1]~dcat(p3[])
+    z4[i+1]~dcat(p4[])
+    
+    }
+    loglik[1]<-log(dnorm(yt[1],(c[1]),sigmav[z3[2]]))
+    yhat[1]<-(c[1])
+    p1[1]<-r1[1]
+    p2[1]<-r2[1]
+    p3[1]<-r3[1]
+    p4[1]<-r4[1]
+    for(j in 2:(m-1)){
+    p1[j]<-(r1[j]*(1-r1[j-1])*p1[j-1]/r1[j-1])+0.0001
+    p2[j]<-(r2[j]*(1-r2[j-1])*p2[j-1]/r2[j-1])+0.0001
+    p3[j]<-(r3[j]*(1-r3[j-1])*p3[j-1]/r3[j-1])+0.0001
+    p4[j]<-(r4[j]*(1-r4[j-1])*p4[j-1]/r4[j-1])}
+    for(l in 1:(m-1)){
+    r1[l]~dbeta(1,alpha+0.0001)
+    r2[l]~dbeta(1,alpha+0.0001)
+    r3[l]~dbeta(1,alpha+0.0001)
+    r4[l]~dbeta(1,alpha)
+    }
+    ps1<-sum(p1[1:(m-1)])
+    p1[m]<-1-ps1
+    ps2<-sum(p2[1:(m-1)])
+    p2[m]<-1-ps2
+    ps3<-sum(p3[1:(m-1)])
+    p3[m]<-1-ps3
+    ps4<-sum(p4[1:(m-1)])
+    p4[m]<-1-ps4
+    for(l in 1:m){
+    muv[l]~dnorm(basemu, basetau)
+    wmuv[l]<-muv[l]*p4[l]
+    sigmav[l]~dgamma(0.01,0.01)
+    aomega[l]~dnorm(basemu, basetau)
+    womega[l]<-aomega[l]*p1[l]
+    bomega[l]~dgamma(0.01,0.01)
+    muv2[l]<-muv[l]-sum(wmuv)
+    aomega2[l]<-aomega[l]-sum(womega)
+    }
+    basemu<-0
+    basetau<-10
+    omega[1]~dnorm(0,bomega[z2[2]])T(-yt[1],)
+    c[1]<-(yt[1])+omega[1]
+    #yt[1]~dnorm((c[1]),sigmav[z3[2]])
+    alpha~dgamma(0.01,0.01)
+    Qprime~dunif(0,1)
+    Gprime~dunif(30,150)
+    kl~dunif(0,.001)
+    }

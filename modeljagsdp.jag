@@ -1,0 +1,36 @@
+model{
+    for (i in 1:N){  
+    omega[i+1]~dgamma(aomega,bomega)
+    c[i+1]<-(1-h*(Qprime+kl*V)/V)*c[i]+h*Gprime/V+(omega[i+1])
+    logyt[i+1]~dnorm(log(c[i+1]),sigmav[z2[i+1]])
+    z1[i+1]~dcat(p1[])
+    z2[i+1]~dcat(p2[])
+    }
+    p1[1]<-r1[1]
+    p2[1]<-r2[1]
+    for(j in 2:(m-1)){p1[j]<-r1[j]*(1-r1[j-1])*p1[j-1]/r1[j-1]
+    p2[j]<-r2[j]*(1-r2[j-1])*p2[j-1]/r2[j-1]}
+    for(l in 1:(m-1)){r1[l]~dbeta(1,alpha)
+    r2[l]~dbeta(1,alpha)}
+    ps1<-sum(p1[1:(m-1)])
+    p1[m]<-1-ps1
+    ps2<-sum(p2[1:(m-1)])
+    p2[m]<-1-ps2
+    for(l in 1:m){
+    muv[l]~dnorm(basemu, basetau)
+    sigmav[l]~dgamma(2,1)
+    }
+    basemu<-0
+    basetau<-10
+    omega[1]~dgamma(aomega,bomega)
+    c[1]<-1
+    logyt[1]~dnorm(log(c[1]), prec)
+    alpha~dunif(0,20)
+    aomega~dunif(0.5,3)
+    bomega~dunif(0.5,3)
+    sigma~dgamma(2,0.01)
+    prec<-1/sigma
+    Qprime~dunif(11,17)
+    Gprime~dunif(281,482)
+    kl~dunif(0,0.8)
+    }

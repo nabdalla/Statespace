@@ -1,0 +1,29 @@
+model{
+    for (i in 1:N){
+    for(j in 1:nloc){
+    csp[j,i+1]<-csp[j,i]+h*(Gprime/(4*(pi*Dt*i)^1.5))*
+    (exp(-(matdist[j])^2/(4*Dt*i)))+exp(eta[j])
+    logyt[j,i+1]~dnorm(log(csp[j,i+1])+et[i+1], 10)
+    }
+    }
+    et[1]<-0
+    for(i in 1:(N+1)){
+    et[(i+1)]<-et[i]+eps
+    }
+    for(j in 1:nloc){
+    for(m in 1:nloc){
+    k[m,j]<-sigma*exp(-dist[m,j])
+    kinv[m,j]<-inverse(k[m,j])
+    }
+    }
+    for(j in 1:nloc){
+    eta[j]~dnorm(muet,kinv[j,1])
+    csp[j,1]<-exp(logyt[j,1])+omega[1]
+    }
+    omega[1]~dgamma(0.001,0.001)
+    #vt[1]<-0
+    Gprime~dunif(281,482)
+    Dt~dunif(0,3)
+    sigma~dgamma(0.01,0.01)
+    eps~dnorm(0,1000)
+    }

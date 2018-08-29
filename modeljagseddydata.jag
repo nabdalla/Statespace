@@ -1,0 +1,22 @@
+model{
+    for (i in 1:N){
+    omega[i+1]~dgamma(0.001,0.001)
+    loglik[i+1]<-logdensity.mnorm(logacetone00484[i+1,],log(csp[i+1,]+et),prec)
+    for(j in 1:2){
+    csp[i+1,j]<-csp[i,j]+h*(Gprime/(4*(pi*Dt*i)^1.5))*
+    (exp(-(matdist[j])^2/(4*Dt*i)))+(omega[i+1])
+    logacetone00484[i+1,j]~dnorm(log(csp[i+1,j]+et[j]), 10)
+    }
+    }
+    et~dmnorm(c(0,0),kinv)
+    for(j in 1:2){
+    #logyt[j,1]~dnorm(log(csp[1,j]+et[j])+eta[1], tausq)
+    csp[1,j]<-exp(logacetone00484[1,j])+omega[1]
+    }
+    omega[1]~dgamma(0.001,0.001)
+    Gprime~dunif(1104,1650)
+    Dt~dunif(0,1)
+    kinv~dwish(I,3)
+    aomega~dunif(1,3)
+    bomega~dunif(1/2,3)
+    }
