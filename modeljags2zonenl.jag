@@ -1,0 +1,26 @@
+model{
+    for (i in 1:N){
+    c[i+1,1:2]<-mexp(h*i*A)%*%c[1,1:2]+B%*%(mexp(h*i*A)-I)%*%(g)
+    logyt[i+1,1:2]~dmnorm(log(abs(c[i+1,1:2])), prec)
+    loglik[i+1]<-(logdensity.mnorm(logyt[i+1,1:2],log(abs(c[i+1,1:2])),prec))
+    }
+    loglik[1]<-(logdensity.mnorm(logyt[1,1:2],log(c[1,1:2]),prec))
+    A[1,1]<- -(beta)/VN
+    A[1,2]<- beta/VN
+    A[2,1]<- beta/VF
+    A[2,2]<- -(beta+Qprime)/VF+kl
+    B[1,1]<- (-(beta+Qprime)/VF +kl)/((beta*Qprime)/(VF*VN)-(beta*kl)/VN)
+    B[1,2]<- (-beta/VN)/((beta*Qprime)/(VF*VN)-(beta*kl)/VN)
+    B[2,1]<- -beta*VF/((beta*Qprime)/(VF*VN)-(beta*kl)/VN)
+    B[2,2]<- -((beta)/VN)/((beta*Qprime)/(VF*VN)-(beta*kl)/VN)
+    g[1,1]<- Gprime/VN
+    g[2,1]<-0
+    c[1,1]<-0.01
+    c[1,2]<-0.5
+    logyt[1,1:2]~dmnorm(log(c[1,1:2]), prec)
+    prec~dwish(I,3)
+    Qprime~dunif(11,17)
+    Gprime~dunif(281,482)
+    kl~dunif(0,0.8)
+    beta~dunif(0,10)
+    }

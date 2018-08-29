@@ -1,0 +1,60 @@
+model{
+    for (i in 1:N){
+    omega[i+1,1:2]~dmnorm(c(0,0),vari[1:2,1:2,z3[i+1]])
+    c[i+1,1]<-(c[i,1]*((a*h)+1)+c[i,2]*b*h+g1*h)+(omega[i+1,1])
+    c[i+1,2]<-(c[i,1]*cc*h+c[i,2]*((d*h)+1))+(omega[i+1,2])
+    yt[i+1,1:2]~dmnorm((c[i+1,1:2])+c(aomega1w[z1[i+1]],aomega2w[z1[i+1]]), prec[1:2,1:2,z4[i+1]])
+    yhat[i+1,1:2]~dmnorm((c[i+1,1:2])+c(aomega1w[z1[i+1]],aomega2w[z1[i+1]]), prec[1:2,1:2,z4[i+1]])
+    loglik[i+1]<-(logdensity.mnorm(yt[i+1,1:2],(c[i+1,1:2])+c(aomega1w[z1[i+1]],aomega2w[z1[i+1]]),prec[1:2,1:2,z4[i+1]]))
+    z1[i+1]~dcat(p1[])
+    z2[i+1]~dcat(p2[])
+    z3[i+1]~dcat(p3[])
+    z4[i+1]~dcat(p4[])
+    }
+    yhat[1,1:2]~dmnorm((c[1,1:2])+c(aomega1w[z1[2]],aomega2w[z1[2]]), prec[1:2,1:2,z4[2]])
+    loglik[1]<-(logdensity.mnorm(yt[1,1:2],(c[1,1:2]),prec[1:2,1:2,z4[2]]))
+    p1[1]<-r1[1]
+    p2[1]<-r2[1]
+    p3[1]<-r3[1]
+    p4[1]<-r4[1]
+    for(j in 2:(m-1)){p1[j]<-(r1[j]*(1-r1[j-1])*p1[j-1]/r1[j-1])+0.0001
+    p2[j]<-(r2[j]*(1-r2[j-1])*p2[j-1]/r2[j-1])+0.0001
+    p3[j]<-(r3[j]*(1-r3[j-1])*p3[j-1]/r3[j-1])+0.0001
+    p4[j]<-(r4[j]*(1-r4[j-1])*p4[j-1]/r4[j-1])+0.0001}
+    for(l in 1:(m-1)){r1[l]~dbeta(1,alpha+0.0001)
+    r2[l]~dbeta(1,alpha+0.0001)
+    r3[l]~dbeta(1,alpha+0.0001)
+    r4[l]~dbeta(1,alpha+0.0001)
+    }
+    ps1<-sum(p1[1:(m-1)])
+    p1[m]<-1-ps1
+    ps2<-sum(p2[1:(m-1)])
+    p2[m]<-1-ps2
+    ps3<-sum(p3[1:(m-1)])
+    p3[m]<-1-ps3
+    ps4<-sum(p4[1:(m-1)])
+    p4[m]<-1-ps4
+    for(l in 1:m){
+    aomega1[l]~dnorm(basemu, basetau)
+    aomega2[l]~dnorm(basemu, basetau)
+    aomega1w[l]<-aomega1[l]-sum(aomega1[l]*p1[l])
+    aomega2w[l]<-aomega2[l]-sum(aomega2[l]*p1[l])
+    vari[1:2,1:2,l]~dwish(I,3)
+    prec[1:2,1:2,l]~dwish(I,3)
+    }
+    basemu<-0
+    basetau<-100
+    alpha~dgamma(0.01,0.01)
+    a<- -(beta)/VN
+    b<-(beta)/VN
+    cc<-beta/VF
+    d<- -(beta+Qprime)/VF+kl
+    g1<-Gprime/VN
+    omega[1,1:2]~dmnorm(c(0,0),100*I)
+    c[1,1:2]<-yt[1,1:2]+omega[1,1:2]
+    #yt[1,1:2]~dmnorm((c[1,1:2]), I)
+    Qprime~dunif(0,1)
+    Gprime~dunif(30,150)
+    kl~dunif(0,0.001)
+    beta~dunif(0,5)
+    }

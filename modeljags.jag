@@ -1,0 +1,21 @@
+model{
+    for (i in 1:N){ 
+    omega[i+1]~dgamma(aomega,bomega)
+    c[i+1]<-(1-h*(Qprime+kl*V)/V)*c[i]+h*Gprime/V+(omega[i+1])
+    logyt[i+1]~dnorm(log(c[i+1]), prec)
+    logyhat[i+1]~dnorm(log(c[i+1]),prec)
+    loglik[i+1]<-log(dnorm(logyt[i+1],log(c[i+1]),prec))
+    }
+    loglik[1]<-log(dnorm(logyt[1],log(c[1]),prec))
+    logyhat[1]~dnorm(log(c[1]),prec)
+    omega[1]~dgamma(aomega,bomega)
+    c[1]<-1
+    logyt[1]~dnorm(log(c[1])+omega[1], prec)
+    sigma<-1/prec
+    aomega~dunif(0,1)
+    bomega~dunif(0,1)
+    prec~dgamma(1,0.001)
+    Qprime~dunif(11,17)
+    Gprime~dunif(281,482)
+    kl~dunif(0,0.8)
+    }
